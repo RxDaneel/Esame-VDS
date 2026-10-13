@@ -77,5 +77,18 @@
 
 <script src="data.js"></script>
 <script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  var hadSW = !!navigator.serviceWorker.controller, reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (hadSW && !reloading) { reloading = true; location.reload(); }
+  });
+  navigator.serviceWorker.register('sw.js').then(function (reg) {
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') reg.update();
+    });
+  }).catch(function () {});
+}
+</script>
 </body>
 </html>
