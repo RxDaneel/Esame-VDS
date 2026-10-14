@@ -5,9 +5,12 @@
 
 const MATERIA_ORDER = ["1","2","3","4","5","6","7","8","9"];
 
-// Versione dell'app (da aggiornare ad ogni pubblicazione)
+// Versione dell'app. BUILD va aggiornato ad ogni pubblicazione, insieme a version.json
 const APP_VERSION = '2.0';
-const APP_VERSION_DATE = '14/10/2026';
+const BUILD = '20261014203157';
+function buildLabel(b){
+  return b.slice(6,8) + '/' + b.slice(4,6) + '/' + b.slice(0,4) + ' ' + b.slice(8,10) + ':' + b.slice(10,12);
+}
 
 const state = {
   screen: "specialty",
@@ -78,8 +81,27 @@ document.getElementById('infoOverlay').addEventListener('click', e=>{
 document.querySelectorAll('.theme-opt').forEach(b=>{
   b.addEventListener('click', ()=> setTheme(b.dataset.theme));
 });
-document.getElementById('appVersion').textContent = 'v' + APP_VERSION + ' · ' + APP_VERSION_DATE;
+document.getElementById('appVersion').textContent = 'v' + APP_VERSION + ' · ' + buildLabel(BUILD);
 applyTheme(getTheme());
+
+/* ---------------- AGGIORNAMENTO AUTOMATICO ----------------
+   GitHub Pages e Safari tengono in memoria la versione vecchia per qualche minuto:
+   se version.json indica una build più nuova, scarico di nuovo la pagina e la ricarico.
+   Non ricarico durante un quiz, per non perdere le risposte date. */
+async function checkUpdate(){
+  if(state.screen === 'quiz') return;
+  try{
+    const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+    const { v } = await r.json();
+    const slot = v + ':' + Math.floor(Date.now() / 300000);   // al massimo un tentativo ogni 5 minuti
+    if(v && v !== BUILD && sessionStorage.getItem('vds.upd') !== slot){
+      sessionStorage.setItem('vds.upd', slot);
+      await fetch(location.pathname, { cache: 'reload' }).catch(()=>{});
+      location.replace(location.pathname + '?v=' + v);
+    }
+  }catch(e){}
+}
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) checkUpdate(); });
 
 function goHome(){
   if(state.screen === 'quiz'){
@@ -91,6 +113,7 @@ function goHome(){
   state.isReview = false;
   state.screen = 'specialty';
   render();
+  checkUpdate();
 }
 
 function shuffle(arr){
@@ -479,3 +502,4 @@ function escapeHtml(s){
 }
 
 render();
+checkUpdate();
