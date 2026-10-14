@@ -12,8 +12,6 @@ const state = {
   mode: null,          // "esame" | "materia"
   materiaKey: null,
   randomOrder: localStorage.getItem('vds_random_order') === '1',
-  explain: localStorage.getItem('vds_explain') === '1',          // impostazione: mostra le spiegazioni
-  explainAll: localStorage.getItem('vds_explain_all') === '1',   // anche per le risposte giuste
   questions: [],        // [{materiaKey, materiaNome, domanda, opzioni, esatta, figura}]
   answers: [],           // parallel array, null = non risposta
   index: 0,
@@ -28,29 +26,8 @@ const $btnBack = document.getElementById('btnBack');
 const $brandSub = document.getElementById('brandSub');
 const $btnDevice = document.getElementById('btnDevice');
 
-function syncSettingsUI(){
-  const a = document.getElementById('toggleExplain'), b = document.getElementById('toggleExplainAll');
-  a.setAttribute('aria-pressed', state.explain);
-  a.querySelector('.toggle-switch').classList.toggle('on', state.explain);
-  b.setAttribute('aria-pressed', state.explainAll);
-  b.querySelector('.toggle-switch').classList.toggle('on', state.explainAll);
-  b.hidden = !state.explain;
-}
 document.getElementById('btnInfo').addEventListener('click', ()=>{
-  syncSettingsUI();
   document.getElementById('infoOverlay').hidden = false;
-});
-document.getElementById('toggleExplain').addEventListener('click', ()=>{
-  state.explain = !state.explain;
-  localStorage.setItem('vds_explain', state.explain ? '1' : '0');
-  syncSettingsUI();
-  if(state.screen === 'quiz') render();
-});
-document.getElementById('toggleExplainAll').addEventListener('click', ()=>{
-  state.explainAll = !state.explainAll;
-  localStorage.setItem('vds_explain_all', state.explainAll ? '1' : '0');
-  syncSettingsUI();
-  if(state.screen === 'quiz') render();
 });
 document.getElementById('btnCloseInfo').addEventListener('click', ()=>{
   document.getElementById('infoOverlay').hidden = true;
@@ -379,7 +356,6 @@ function renderQuizScreen(){
       <p class="question-text">${escapeHtml(q.domanda)}</p>
       ${q.figura ? `<img class="question-figure" src="${IMAGES['fig'+q.figura+'.jpg']}" alt="Figura ${q.figura}">` : ''}
       <div class="options" id="optionsWrap"></div>
-      <div class="explain" id="explainWrap" hidden></div>
     </div>
 
     <div class="quiz-footer">
@@ -418,8 +394,6 @@ function renderQuizScreen(){
     optWrap.appendChild(b);
   });
 
-  setupExplain(el, q, given);
-
   const dotmap = el.querySelector('#dotmap');
   state.questions.forEach((qq, i)=>{
     const ans = state.answers[i];
@@ -440,35 +414,6 @@ function renderQuizScreen(){
     state.screen = 'results';
     render();
   });
-}
-
-/* ---------------- SPIEGAZIONI ---------------- */
-
-// Stessa chiave usata per generare spiegazioni.js (FNV-1a 32 bit, base 36)
-function qKey(q){
-  const s = q.domanda + '|' + q.opzioni[q.esatta];
-  let x = 2166136261;
-  for(let i=0;i<s.length;i++){ x ^= s.charCodeAt(i); x = Math.imul(x,16777619)>>>0; }
-  return x.toString(36);
-}
-
-function setupExplain(el, q, given){
-  const wrap = el.querySelector('#explainWrap');
-  if(!state.explain || given === null) return;
-  const isWrong = given !== q.esatta;
-  if(!isWrong && !state.explainAll) return;
-  const corretta = q.opzioni[q.esatta];
-  const text = (typeof EXPLANATIONS !== 'undefined') ? EXPLANATIONS[qKey(q)] : null;
-  const query = encodeURIComponent(q.domanda + ' ' + corretta);
-  wrap.hidden = false;
-  wrap.innerHTML =
-      `<div class="explain-head">Spiegazione</div>`
-    + (text ? `<p class="explain-text">${escapeHtml(text)}</p>`
-            : `<p class="explain-none">Per questa domanda non c'è una spiegazione scritta.</p>`)
-    + `<div class="explain-links"><a href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener">Approfondisci online ↗</a></div>`
-    + `<p class="explain-note">Spiegazione scritta da un'intelligenza artificiale a partire dalla risposta del quiz: può contenere errori. In caso di dubbio controlla sul manuale.</p>`;
-  // su schermi piccoli la scheda scorre: porta la spiegazione in vista solo se serve
-  requestAnimationFrame(()=>{ try{ wrap.scrollIntoView({block:'nearest', behavior:'smooth'}); }catch(e){} });
 }
 
 /* ---------------- SCREEN: RESULTS ---------------- */
