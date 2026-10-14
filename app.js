@@ -12,6 +12,8 @@ const state = {
   mode: null,          // "esame" | "materia"
   materiaKey: null,
   randomOrder: localStorage.getItem('vds_random_order') === '1',
+  explain: localStorage.getItem('vds_explain') === '1',          // impostazione: spiegazione online
+  explainAll: localStorage.getItem('vds_explain_all') === '1',   // anche per le risposte giuste
   questions: [],        // [{materiaKey, materiaNome, domanda, opzioni, esatta, figura}]
   answers: [],           // parallel array, null = non risposta
   index: 0,
@@ -26,8 +28,29 @@ const $btnBack = document.getElementById('btnBack');
 const $brandSub = document.getElementById('brandSub');
 const $btnDevice = document.getElementById('btnDevice');
 
+function syncSettingsUI(){
+  const a = document.getElementById('toggleExplain'), b = document.getElementById('toggleExplainAll');
+  a.setAttribute('aria-pressed', state.explain);
+  a.querySelector('.toggle-switch').classList.toggle('on', state.explain);
+  b.setAttribute('aria-pressed', state.explainAll);
+  b.querySelector('.toggle-switch').classList.toggle('on', state.explainAll);
+  b.hidden = !state.explain;
+}
 document.getElementById('btnInfo').addEventListener('click', ()=>{
+  syncSettingsUI();
   document.getElementById('infoOverlay').hidden = false;
+});
+document.getElementById('toggleExplain').addEventListener('click', ()=>{
+  state.explain = !state.explain;
+  localStorage.setItem('vds_explain', state.explain ? '1' : '0');
+  syncSettingsUI();
+  if(state.screen === 'quiz') render();
+});
+document.getElementById('toggleExplainAll').addEventListener('click', ()=>{
+  state.explainAll = !state.explainAll;
+  localStorage.setItem('vds_explain_all', state.explainAll ? '1' : '0');
+  syncSettingsUI();
+  if(state.screen === 'quiz') render();
 });
 document.getElementById('btnCloseInfo').addEventListener('click', ()=>{
   document.getElementById('infoOverlay').hidden = true;
@@ -356,6 +379,7 @@ function renderQuizScreen(){
       <p class="question-text">${escapeHtml(q.domanda)}</p>
       ${q.figura ? `<img class="question-figure" src="${IMAGES['fig'+q.figura+'.jpg']}" alt="Figura ${q.figura}">` : ''}
       <div class="options" id="optionsWrap"></div>
+      <div class="explain" id="explainWrap" hidden></div>
     </div>
 
     <div class="quiz-footer">
@@ -394,6 +418,8 @@ function renderQuizScreen(){
     optWrap.appendChild(b);
   });
 
+  setupExplain(el, q, given);
+
   const dotmap = el.querySelector('#dotmap');
   state.questions.forEach((qq, i)=>{
     const ans = state.answers[i];
@@ -414,6 +440,62 @@ function renderQuizScreen(){
     state.screen = 'results';
     render();
   });
+}
+
+/* ---------------- SPIEGAZIONE ONLINE ---------------- */
+
+const explainCache = {};
+
+function setupExplain(el, q, given){
+  const wrap = el.querySelector('#explainWrap');
+  if(!state.explain || given === null) return;
+  const isWrong = given !== q.esatta;
+  if(!isWrong && !state.explainAll) return;
+  wrap.hidden = false;
+  const key = state.index + '|' + q.domanda;
+  wrap.innerHTML = `<button class="btn btn-ghost explain-btn" id="btnExplain">Spiega online</button><div class="explain-body" id="explainBody"></div>`;
+  const body = wrap.querySelector('#explainBody');
+  const btn = wrap.querySelector('#btnExplain');
+  const show = html => { body.innerHTML = html; btn.hidden = true; };
+  if(explainCache[key]){ show(explainCache[key]); return; }
+  btn.addEventListener('click', async ()=>{
+    btn.disabled = true; btn.textContent = 'Cerco…';
+    const html = await buildExplanation(q);
+    explainCache[key] = html;
+    show(html);
+  });
+}
+
+async function wikiSearch(term){
+  const url = 'https://it.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search'
+    + '&gsrlimit=3&gsrsearch=' + encodeURIComponent(term)
+    + '&prop=extracts&exintro=1&explaintext=1&exchars=420&exlimit=3';
+  const res = await fetch(url);
+  const data = await res.json();
+  const pages = data.query ? Object.values(data.query.pages) : [];
+  return pages.sort((a,b)=>a.index-b.index).filter(p=>p.extract);
+}
+
+async function buildExplanation(q){
+  const corretta = q.opzioni[q.esatta];
+  const full = (q.domanda + ' ' + corretta).replace(/\s+/g,' ').slice(0,250);
+  const terms = [full, corretta, q.domanda.slice(0,200)];
+  let pages = [];
+  for(const t of terms){
+    try{ pages = await wikiSearch(t); }catch(e){ pages = []; break; }
+    if(pages.length) break;
+  }
+  const query = encodeURIComponent(q.domanda + ' ' + corretta);
+  const links = `<div class="explain-links">
+      <a href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener">Cerca su Google ↗</a>
+      <a href="https://duckduckgo.com/?q=${query}" target="_blank" rel="noopener">DuckDuckGo ↗</a>
+    </div>`;
+  const items = pages.map(p=>`<div class="explain-item">
+      <a href="https://it.wikipedia.org/?curid=${p.pageid}" target="_blank" rel="noopener"><b>${escapeHtml(p.title)}</b> · Wikipedia ↗</a>
+      <p>${escapeHtml(p.extract)}</p></div>`).join('');
+  return `<div class="explain-answer">Risposta corretta: <b>${String.fromCharCode(65+q.esatta)}</b> — ${escapeHtml(corretta)}</div>`
+    + (items || `<p class="explain-none">Nessun approfondimento trovato automaticamente: prova con una ricerca.</p>`)
+    + links;
 }
 
 /* ---------------- SCREEN: RESULTS ---------------- */

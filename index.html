@@ -60,7 +60,7 @@
 
 <div class="modal-overlay" id="infoOverlay" hidden>
   <div class="modal" role="dialog" aria-modal="true">
-    <h3>Info e supporto</h3>
+    <h3>Info e impostazioni</h3>
     <p>Simulatore per l'esame teorico VDS (Volo da Diporto o Sportivo), ricostruito a partire dal
        questionario ufficiale contenuto nell'app originale <strong>esame_VDS</strong>, con la stessa
        banca dati di domande e la stessa logica di correzione — nuova interfaccia, stessi contenuti.</p>
@@ -70,6 +70,22 @@
         (errori + risposte non date ≤ 10% del totale).</li>
       <li><strong>Simula per Materia</strong>: tutte le domande di una singola materia, per lo studio mirato.</li>
     </ul>
+    <div class="settings-group">
+      <button class="toggle-row" id="toggleExplain" aria-pressed="false">
+        <span class="toggle-row-text">
+          <span class="toggle-row-title">Spiegazione online</span>
+          <span class="toggle-row-desc">Nelle domande sbagliate, pulsante per cercare online una spiegazione</span>
+        </span>
+        <span class="toggle-switch"><span class="toggle-knob"></span></span>
+      </button>
+      <button class="toggle-row" id="toggleExplainAll" aria-pressed="false" hidden>
+        <span class="toggle-row-text">
+          <span class="toggle-row-title">Anche per le risposte giuste</span>
+          <span class="toggle-row-desc">Mostra il pulsante anche quando hai risposto correttamente</span>
+        </span>
+        <span class="toggle-switch"><span class="toggle-knob"></span></span>
+      </button>
+    </div>
     <button class="btn btn-primary" id="btnCloseInfo">Chiudi</button>
   </div>
 </div>
