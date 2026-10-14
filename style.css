@@ -19,6 +19,11 @@
   --green-dim:     #12301A;
   --red:           #E06060;
   --red-dim:       #3A1818;
+  --on-green:      #000000;
+  --on-red:        #000000;
+  --tint-accent:   rgba(230,230,230,0.07);
+  --tint-accent-2: rgba(230,230,230,0.16);
+  --overlay:       rgba(0,0,0,0.78);
   color-scheme: dark;
   --radius-lg: 18px;
   --radius-md: 12px;
@@ -27,6 +32,33 @@
   --font-display: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}
+
+/* ---- Tema chiaro (stessa palette "carta" delle altre app) ---- */
+:root[data-theme="light"]{
+  --bg:            #F3F1EA;
+  --panel:         #E9E6DC;
+  --panel-2:       #DFDBCF;
+  --panel-3:       #D6D1C4;
+  --hairline:      #D6D1C4;
+  --hairline-lite: #C6C0B1;
+  --text-hi:       #141413;
+  --text-mid:      #4A4943;
+  --text-dim:      #65635C;
+  --amber:         #3B3B38;
+  --amber-dim:     #B7B2A3;
+  --on-accent:     #F5F4EF;
+  --green:         #2F7D32;
+  --green-dim:     #CFE3CF;
+  --red:           #C43C3C;
+  --red-dim:       #EFCFCF;
+  --on-green:      #FFFFFF;
+  --on-red:        #FFFFFF;
+  --tint-accent:   rgba(59,59,56,0.08);
+  --tint-accent-2: rgba(59,59,56,0.14);
+  --overlay:       rgba(20,20,19,0.45);
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.6) inset, 0 12px 30px -14px rgba(20,20,19,0.25);
+  color-scheme: light;
 }
 
 *{ box-sizing: border-box; }
@@ -63,32 +95,6 @@ body{
   position: sticky;
   top:0;
   z-index:20;
-}
-.topbar-left, .topbar-right{ min-width: 44px; display:flex; gap:8px; }
-.topbar-right{ justify-content:flex-end; }
-.topbar-center{ flex:1; display:flex; justify-content:center; }
-.brand{
-  display:flex; align-items:center; gap:10px; color: var(--amber);
-  background:none; border:none; padding:4px 6px; margin:-4px -6px;
-  border-radius: 10px; cursor:pointer; font:inherit;
-  transition: background .15s ease;
-}
-.brand:hover{ background: var(--panel-2); }
-.brand:active{ transform: scale(0.98); }
-.brand-mark{ display:flex; color: var(--amber); }
-.brand-text{ display:flex; flex-direction:column; line-height:1.15; }
-.brand-text strong{
-  font-family: var(--font-display);
-  font-size: 15px;
-  letter-spacing: 0.09em;
-  color: var(--text-hi);
-}
-.brand-text em{
-  font-style: normal;
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  color: var(--text-dim);
-  text-transform: uppercase;
 }
 .icon-btn{
   width:38px; height:38px;
@@ -213,7 +219,7 @@ p.screen-sub{
   position:absolute; top:10px; left:10px; z-index:1;
   font-family: var(--font-mono);
   font-size:9.5px;
-  color: var(--amber);
+  color: #E6E6E6;
   background: rgba(0,0,0,0.7);
   border:1px solid rgba(230,230,230,0.35);
   padding: 3px 6px;
@@ -300,7 +306,7 @@ p.screen-sub{
   background: var(--text-mid);
   transition: transform .18s ease, background .18s ease;
 }
-.toggle-switch.on{ background: rgba(230,230,230,0.16); border-color: var(--amber-dim); }
+.toggle-switch.on{ background: var(--tint-accent-2); border-color: var(--amber-dim); }
 .toggle-switch.on .toggle-knob{ transform: translateX(18px); background: var(--amber); }
 
 /* ---------------- QUIZ SCREEN ---------------- */
@@ -385,13 +391,13 @@ p.screen-sub{
   display:flex; align-items:center; justify-content:center;
   font-size:12px; color: var(--text-mid); flex-shrink:0;
 }
-.option.selected{ border-color: var(--amber); background: rgba(230,230,230,0.07); }
+.option.selected{ border-color: var(--amber); background: var(--tint-accent); }
 .option.selected .letter{ background: var(--amber); border-color: var(--amber); color: var(--on-accent); }
 
 .option.correct{ border-color: var(--green); background: rgba(92,184,96,0.10); }
-.option.correct .letter{ background: var(--green); border-color: var(--green); color:#000; }
+.option.correct .letter{ background: var(--green); border-color: var(--green); color: var(--on-green); }
 .option.wrong{ border-color: var(--red); background: rgba(224,96,96,0.10); }
-.option.wrong .letter{ background: var(--red); border-color: var(--red); color:#000; }
+.option.wrong .letter{ background: var(--red); border-color: var(--red); color: var(--on-red); }
 .option.disabled{ cursor:default; }
 
 .quiz-nav{
@@ -500,7 +506,7 @@ p.screen-sub{
 
 /* ---------------- MODAL ---------------- */
 .modal-overlay{
-  position:fixed; inset:0; background: rgba(0,0,0,0.78);
+  position:fixed; inset:0; background: var(--overlay);
   display:flex; align-items:center; justify-content:center;
   z-index:50; padding:20px; backdrop-filter: blur(3px);
 }
@@ -525,30 +531,6 @@ p.screen-sub{
   color: var(--text-dim); margin-top:34px; letter-spacing:.04em;
 }
 
-/* ---------------- DEVICE SELECT SCREEN ---------------- */
-.device-grid{ display:grid; gap:14px; grid-template-columns: 1fr; max-width:560px; }
-@media(min-width:560px){ .device-grid{ grid-template-columns: 1fr 1fr; } }
-.device-card{
-  border: 1px solid var(--hairline);
-  background: var(--panel);
-  border-radius: var(--radius-lg);
-  padding: 22px 20px;
-  cursor:pointer;
-  text-align:left;
-  color: var(--text-hi);
-  transition: all .18s ease;
-  display:flex; flex-direction:column; gap:10px;
-}
-.device-card:hover{ border-color: var(--amber-dim); background: var(--panel-2); transform: translateY(-2px); }
-.device-icon{
-  width:46px; height:46px; border-radius:11px;
-  display:flex; align-items:center; justify-content:center;
-  background: var(--panel-3); color: var(--amber);
-  border:1px solid var(--hairline-lite);
-}
-.device-title{ font-family: var(--font-display); font-size:17px; }
-.device-desc{ font-size:13px; color: var(--text-mid); line-height:1.55; }
-
 /* ================================================================
    DEVICE MODE: MOBILE — colonna singola, tap target grandi,
    barra di navigazione del quiz fissa in basso
@@ -563,7 +545,7 @@ body.device-mobile .option{ padding: 11px 12px; font-size: 13.5px; gap:10px; }
 body.device-mobile .option .letter{ width:22px; height:22px; font-size:11px; }
 body.device-mobile .spec-grid{ grid-template-columns: repeat(2, 1fr); }
 body.device-mobile .subject-row{ padding: 15px 16px; min-height:52px; }
-body.device-mobile .mode-card, body.device-mobile .device-card{ padding: 18px 16px; }
+body.device-mobile .mode-card{ padding: 18px 16px; }
 
 /* compact quiz header on mobile: drop the redundant circular gauge,
    keep only the thin linear progress bar, tighten spacing */
@@ -699,3 +681,20 @@ body.device-web .result-top{ align-items:center; }
   .question-text{ font-size:16.5px; }
   .result-top{ padding:18px; }
 }
+
+/* ---------------- IMPOSTAZIONI ---------------- */
+.setting-block{ margin: 6px 0 18px; }
+.setting-label{ font-family: var(--font-mono); font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color: var(--text-dim); }
+.theme-choice{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px; }
+.theme-opt{
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  padding: 12px 8px 10px; border-radius: var(--radius-md);
+  background: var(--panel); border:1.5px solid var(--hairline);
+  color: var(--text-hi); font: 500 13.5px var(--font-body); cursor:pointer;
+}
+.theme-opt.on{ border-color: var(--amber); }
+.theme-sw{ width:42px; height:42px; border-radius:50%; border:1px solid rgba(128,128,128,.45); display:block; }
+.sw-base{ background:#000; box-shadow: inset 0 0 0 7px #1A1A1A; }
+.sw-light{ background:#F3F1EA; box-shadow: inset 0 0 0 7px #DFDBCF; }
+.setting-row{ display:flex; justify-content:space-between; align-items:center; padding: 14px 0; margin-bottom: 18px; border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline); }
+.setting-value{ font-family: var(--font-mono); font-size:13px; color: var(--text-mid); }

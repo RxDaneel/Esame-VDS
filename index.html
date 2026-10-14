@@ -14,6 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("vds_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,34 +23,12 @@
 
   <!-- HEADER / INSTRUMENT BAR -->
   <header class="topbar" id="topbar">
-    <div class="topbar-left">
-      <button class="icon-btn" id="btnBack" title="Indietro" aria-label="Indietro" hidden>
-        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M15 4L7 12l8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </div>
-    <div class="topbar-center">
-      <button class="brand" id="btnHome" title="Torna alla schermata iniziale" aria-label="Torna alla schermata iniziale">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="-400 -445 800 700" width="30" height="26" fill="currentColor">
-            <defs><path id="blade" d="M0 0 C-70 -70 -110 -250 -50 -420 Q0 -455 50 -420 C110 -250 70 -70 0 0 Z"/></defs>
-            <use href="#blade"/><use href="#blade" transform="rotate(120)"/><use href="#blade" transform="rotate(240)"/>
-            <circle r="46"/>
-          </svg>
-        </span>
-        <span class="brand-text">
-          <strong>ESAME&nbsp;VDS</strong>
-          <em id="brandSub">Simulatore di quiz</em>
-        </span>
-      </button>
-    </div>
-    <div class="topbar-right">
-      <button class="icon-btn" id="btnDevice" title="Cambia layout" aria-label="Cambia layout web/smartphone">
-        <svg viewBox="0 0 24 24" width="19" height="19"><rect x="2.5" y="4" width="13" height="10" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="17.5" y="8" width="5" height="9" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-      </button>
-      <button class="icon-btn" id="btnInfo" title="Informazioni" aria-label="Informazioni">
-        <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.15" fill="currentColor"/></svg>
-      </button>
-    </div>
+    <button class="icon-btn" id="btnHome" title="Home" aria-label="Home">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5l9-7 9 7V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+    </button>
+    <button class="icon-btn" id="btnSettings" title="Impostazioni" aria-label="Impostazioni">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
   </header>
 
   <div class="scanline" aria-hidden="true"></div>
@@ -59,17 +38,16 @@
 </div>
 
 <div class="modal-overlay" id="infoOverlay" hidden>
-  <div class="modal" role="dialog" aria-modal="true">
-    <h3>Info e supporto</h3>
-    <p>Simulatore per l'esame teorico VDS (Volo da Diporto o Sportivo), ricostruito a partire dal
-       questionario ufficiale contenuto nell'app originale <strong>esame_VDS</strong>, con la stessa
-       banca dati di domande e la stessa logica di correzione — nuova interfaccia, stessi contenuti.</p>
-    <ul class="info-list">
-      <li><strong>Simula Esame</strong>: estrae casualmente le domande da ogni materia, nelle stesse
-        quote dell'esame reale, e calcola l'idoneità con la stessa soglia dell'originale
-        (errori + risposte non date ≤ 10% del totale).</li>
-      <li><strong>Simula per Materia</strong>: tutte le domande di una singola materia, per lo studio mirato.</li>
-    </ul>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <h3 id="settingsTitle">Impostazioni</h3>
+    <div class="setting-block">
+      <div class="setting-label">Tema</div>
+      <div class="theme-choice" role="radiogroup" aria-label="Tema">
+        <button class="theme-opt" data-theme="base" role="radio" aria-checked="true"><span class="theme-sw sw-base"></span>Base</button>
+        <button class="theme-opt" data-theme="light" role="radio" aria-checked="false"><span class="theme-sw sw-light"></span>Chiaro</button>
+      </div>
+    </div>
+    <div class="setting-row"><span class="setting-label">Versione</span><span id="appVersion" class="setting-value"></span></div>
     <button class="btn btn-primary" id="btnCloseInfo">Chiudi</button>
   </div>
 </div>

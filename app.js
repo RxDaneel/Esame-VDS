@@ -5,9 +5,12 @@
 
 const MATERIA_ORDER = ["1","2","3","4","5","6","7","8","9"];
 
+// Versione dell'app (da aggiornare ad ogni pubblicazione)
+const APP_VERSION = '2.0';
+const APP_VERSION_DATE = '14/10/2026';
+
 const state = {
-  screen: "device",
-  device: localStorage.getItem('vds_device') || null, // "web" | "mobile"
+  screen: "specialty",
   specialtyKey: null,
   mode: null,          // "esame" | "materia"
   materiaKey: null,
@@ -18,66 +21,75 @@ const state = {
   verified: false,
   isReview: false,       // true = sessione di ripasso dei soli errori
 };
-if(state.device){ state.screen = 'specialty'; }
 
 const $main = document.getElementById('main');
-const $topbar = document.getElementById('topbar');
-const $btnBack = document.getElementById('btnBack');
-const $brandSub = document.getElementById('brandSub');
-const $btnDevice = document.getElementById('btnDevice');
 
-document.getElementById('btnInfo').addEventListener('click', ()=>{
+/* ---------------- LAYOUT AUTOMATICO (web / telefono) ---------------- */
+
+function detectDevice(){
+  const small = window.innerWidth < 760;
+  const phoneLandscape = window.innerHeight < 500 && window.matchMedia('(pointer: coarse)').matches;
+  return (small || phoneLandscape) ? 'mobile' : 'web';
+}
+let currentDevice = null;
+function applyDeviceClass(){
+  currentDevice = detectDevice();
+  document.body.classList.toggle('device-web', currentDevice === 'web');
+  document.body.classList.toggle('device-mobile', currentDevice === 'mobile');
+}
+window.addEventListener('resize', ()=>{
+  if(detectDevice() !== currentDevice) render();
+});
+
+/* ---------------- TEMA ---------------- */
+
+const THEME_COLORS = { base: '#000000', light: '#F3F1EA' };
+function getTheme(){
+  try{ return localStorage.getItem('vds_theme') === 'light' ? 'light' : 'base'; }catch(e){ return 'base'; }
+}
+function applyTheme(theme){
+  if(theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  else document.documentElement.removeAttribute('data-theme');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', THEME_COLORS[theme] || THEME_COLORS.base);
+  document.querySelectorAll('.theme-opt').forEach(b=>{
+    const on = b.dataset.theme === theme;
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+    b.classList.toggle('on', on);
+  });
+}
+function setTheme(theme){
+  try{ localStorage.setItem('vds_theme', theme); }catch(e){}
+  applyTheme(theme);
+}
+
+/* ---------------- BARRA IN ALTO + IMPOSTAZIONI ---------------- */
+
+document.getElementById('btnHome').addEventListener('click', goHome);
+document.getElementById('btnSettings').addEventListener('click', ()=>{
   document.getElementById('infoOverlay').hidden = false;
 });
 document.getElementById('btnCloseInfo').addEventListener('click', ()=>{
   document.getElementById('infoOverlay').hidden = true;
 });
-$btnBack.addEventListener('click', goBack);
-document.getElementById('btnHome').addEventListener('click', goHome);
-$btnDevice.addEventListener('click', ()=>{
-  const prevScreen = state.screen;
-  state.screen = 'device';
-  state._returnTo = (prevScreen !== 'device') ? prevScreen : 'specialty';
-  render();
+document.getElementById('infoOverlay').addEventListener('click', e=>{
+  if(e.target.id === 'infoOverlay') e.currentTarget.hidden = true;
 });
-
-function applyDeviceClass(){
-  document.body.classList.toggle('device-web', state.device === 'web');
-  document.body.classList.toggle('device-mobile', state.device === 'mobile');
-}
-
-function chooseDevice(d){
-  state.device = d;
-  localStorage.setItem('vds_device', d);
-  applyDeviceClass();
-  state.screen = state._returnTo || 'specialty';
-  state._returnTo = null;
-  render();
-}
+document.querySelectorAll('.theme-opt').forEach(b=>{
+  b.addEventListener('click', ()=> setTheme(b.dataset.theme));
+});
+document.getElementById('appVersion').textContent = 'v' + APP_VERSION + ' · ' + APP_VERSION_DATE;
+applyTheme(getTheme());
 
 function goHome(){
   if(state.screen === 'quiz'){
     if(!confirm('Uscire dalla simulazione in corso? I progressi andranno persi.')) return;
   }
-  if(state.screen === 'device') return;
   state.specialtyKey = null;
   state.mode = null;
   state.materiaKey = null;
   state.isReview = false;
-  state._returnTo = null;
   state.screen = 'specialty';
-  render();
-}
-
-function goBack(){
-  if(state.screen === 'menu'){ state.specialtyKey = null; state.screen = 'specialty'; }
-  else if(state.screen === 'subjectPick'){ state.screen = 'menu'; }
-  else if(state.screen === 'quiz'){
-    if(!confirm('Uscire dalla simulazione in corso? I progressi andranno persi.')) return;
-    state.screen = 'menu';
-  }
-  else if(state.screen === 'results'){ state.screen = 'menu'; }
-  else if(state.screen === 'device'){ state.screen = state._returnTo || 'specialty'; state._returnTo = null; }
   render();
 }
 
@@ -98,11 +110,8 @@ function pct(part, total){ return total ? Math.round((part/total)*100) : 0; }
 
 function render(){
   applyDeviceClass();
-  $btnBack.hidden = (state.screen === 'specialty' || state.screen === 'device');
-  $brandSub.textContent = subtitleFor(state.screen);
   $main.innerHTML = '';
   const map = {
-    device: renderDeviceScreen,
     specialty: renderSpecialtyScreen,
     menu: renderMenuScreen,
     subjectPick: renderSubjectPickScreen,
@@ -113,52 +122,9 @@ function render(){
   window.scrollTo(0,0);
 }
 
-function subtitleFor(screen){
-  const sp = state.specialtyKey ? QUIZ_DATA.specialita[state.specialtyKey].nome : null;
-  switch(screen){
-    case 'device': return 'Simulatore di quiz';
-    case 'specialty': return 'Simulatore di quiz';
-    case 'menu': return sp;
-    case 'subjectPick': return sp + ' · Simula per materia';
-    case 'quiz': return sp + (state.isReview ? ' · Ripasso errori' : (state.mode==='esame' ? ' · Simulazione esame' : ' · ' + currentMateriaName()));
-    case 'results': return sp + (state.isReview ? ' · Risultati ripasso' : ' · Risultati');
-    default: return 'Simulatore di quiz';
-  }
-}
 function currentMateriaName(){
   if(!state.materiaKey) return '';
   return QUIZ_DATA.specialita[state.specialtyKey].materie[state.materiaKey].nome;
-}
-
-/* ---------------- SCREEN: DEVICE ---------------- */
-
-function renderDeviceScreen(){
-  const el = document.createElement('div');
-  el.className = 'screen';
-  el.innerHTML = `
-    <div class="eyebrow">Preferenze</div>
-    <h1 class="screen-title">Come vuoi usare l'app?</h1>
-    <p class="screen-sub">Scegli il layout più adatto a come stai guardando questa pagina. Potrai cambiarlo in qualsiasi momento dall'icona in alto.</p>
-    <div class="device-grid">
-      <button class="device-card" id="cardWeb">
-        <span class="device-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 20.5h8M12 17v3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </span>
-        <span class="device-title">Web / Desktop</span>
-        <span class="device-desc">Layout più ampio, pensato per mouse e schermo grande: pannelli affiancati e più contenuto visibile insieme.</span>
-      </button>
-      <button class="device-card" id="cardMobile">
-        <span class="device-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 18.5h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </span>
-        <span class="device-title">Smartphone</span>
-        <span class="device-desc">Layout a colonna singola con pulsanti grandi e barra di navigazione fissa in basso, ottimizzato per il tocco.</span>
-      </button>
-    </div>
-  `;
-  $main.appendChild(el);
-  el.querySelector('#cardWeb').addEventListener('click', ()=> chooseDevice('web'));
-  el.querySelector('#cardMobile').addEventListener('click', ()=> chooseDevice('mobile'));
 }
 
 /* ---------------- SCREEN: SPECIALTY ---------------- */
