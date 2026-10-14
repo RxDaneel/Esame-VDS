@@ -73,15 +73,15 @@
     <div class="settings-group">
       <button class="toggle-row" id="toggleExplain" aria-pressed="false">
         <span class="toggle-row-text">
-          <span class="toggle-row-title">Spiegazione online</span>
-          <span class="toggle-row-desc">Nelle domande sbagliate, pulsante per cercare online una spiegazione</span>
+          <span class="toggle-row-title">Spiegazioni</span>
+          <span class="toggle-row-desc">Dopo una risposta sbagliata, mostra una breve spiegazione (scritta da un'AI, può contenere errori)</span>
         </span>
         <span class="toggle-switch"><span class="toggle-knob"></span></span>
       </button>
       <button class="toggle-row" id="toggleExplainAll" aria-pressed="false" hidden>
         <span class="toggle-row-text">
           <span class="toggle-row-title">Anche per le risposte giuste</span>
-          <span class="toggle-row-desc">Mostra il pulsante anche quando hai risposto correttamente</span>
+          <span class="toggle-row-desc">Mostra la spiegazione anche quando hai risposto correttamente</span>
         </span>
         <span class="toggle-switch"><span class="toggle-knob"></span></span>
       </button>
@@ -91,6 +91,7 @@
 </div>
 
 <script src="data.js"></script>
+<script src="spiegazioni.js"></script>
 <script src="app.js"></script>
 <script>
 if ('serviceWorker' in navigator) {

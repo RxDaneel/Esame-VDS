@@ -12,7 +12,7 @@ const state = {
   mode: null,          // "esame" | "materia"
   materiaKey: null,
   randomOrder: localStorage.getItem('vds_random_order') === '1',
-  explain: localStorage.getItem('vds_explain') === '1',          // impostazione: spiegazione online
+  explain: localStorage.getItem('vds_explain') === '1',          // impostazione: mostra le spiegazioni
   explainAll: localStorage.getItem('vds_explain_all') === '1',   // anche per le risposte giuste
   questions: [],        // [{materiaKey, materiaNome, domanda, opzioni, esatta, figura}]
   answers: [],           // parallel array, null = non risposta
@@ -442,60 +442,33 @@ function renderQuizScreen(){
   });
 }
 
-/* ---------------- SPIEGAZIONE ONLINE ---------------- */
+/* ---------------- SPIEGAZIONI ---------------- */
 
-const explainCache = {};
+// Stessa chiave usata per generare spiegazioni.js (FNV-1a 32 bit, base 36)
+function qKey(q){
+  const s = q.domanda + '|' + q.opzioni[q.esatta];
+  let x = 2166136261;
+  for(let i=0;i<s.length;i++){ x ^= s.charCodeAt(i); x = Math.imul(x,16777619)>>>0; }
+  return x.toString(36);
+}
 
 function setupExplain(el, q, given){
   const wrap = el.querySelector('#explainWrap');
   if(!state.explain || given === null) return;
   const isWrong = given !== q.esatta;
   if(!isWrong && !state.explainAll) return;
-  wrap.hidden = false;
-  const key = state.index + '|' + q.domanda;
-  wrap.innerHTML = `<button class="btn btn-ghost explain-btn" id="btnExplain">Spiega online</button><div class="explain-body" id="explainBody"></div>`;
-  const body = wrap.querySelector('#explainBody');
-  const btn = wrap.querySelector('#btnExplain');
-  const show = html => { body.innerHTML = html; btn.hidden = true; };
-  if(explainCache[key]){ show(explainCache[key]); return; }
-  btn.addEventListener('click', async ()=>{
-    btn.disabled = true; btn.textContent = 'Cerco…';
-    const html = await buildExplanation(q);
-    explainCache[key] = html;
-    show(html);
-  });
-}
-
-async function wikiSearch(term){
-  const url = 'https://it.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search'
-    + '&gsrlimit=3&gsrsearch=' + encodeURIComponent(term)
-    + '&prop=extracts&exintro=1&explaintext=1&exchars=420&exlimit=3';
-  const res = await fetch(url);
-  const data = await res.json();
-  const pages = data.query ? Object.values(data.query.pages) : [];
-  return pages.sort((a,b)=>a.index-b.index).filter(p=>p.extract);
-}
-
-async function buildExplanation(q){
   const corretta = q.opzioni[q.esatta];
-  const full = (q.domanda + ' ' + corretta).replace(/\s+/g,' ').slice(0,250);
-  const terms = [full, corretta, q.domanda.slice(0,200)];
-  let pages = [];
-  for(const t of terms){
-    try{ pages = await wikiSearch(t); }catch(e){ pages = []; break; }
-    if(pages.length) break;
-  }
+  const text = (typeof EXPLANATIONS !== 'undefined') ? EXPLANATIONS[qKey(q)] : null;
   const query = encodeURIComponent(q.domanda + ' ' + corretta);
-  const links = `<div class="explain-links">
-      <a href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener">Cerca su Google ↗</a>
-      <a href="https://duckduckgo.com/?q=${query}" target="_blank" rel="noopener">DuckDuckGo ↗</a>
-    </div>`;
-  const items = pages.map(p=>`<div class="explain-item">
-      <a href="https://it.wikipedia.org/?curid=${p.pageid}" target="_blank" rel="noopener"><b>${escapeHtml(p.title)}</b> · Wikipedia ↗</a>
-      <p>${escapeHtml(p.extract)}</p></div>`).join('');
-  return `<div class="explain-answer">Risposta corretta: <b>${String.fromCharCode(65+q.esatta)}</b> — ${escapeHtml(corretta)}</div>`
-    + (items || `<p class="explain-none">Nessun approfondimento trovato automaticamente: prova con una ricerca.</p>`)
-    + links;
+  wrap.hidden = false;
+  wrap.innerHTML =
+      `<div class="explain-head">Spiegazione</div>`
+    + (text ? `<p class="explain-text">${escapeHtml(text)}</p>`
+            : `<p class="explain-none">Per questa domanda non c'è una spiegazione scritta.</p>`)
+    + `<div class="explain-links"><a href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener">Approfondisci online ↗</a></div>`
+    + `<p class="explain-note">Spiegazione scritta da un'intelligenza artificiale a partire dalla risposta del quiz: può contenere errori. In caso di dubbio controlla sul manuale.</p>`;
+  // su schermi piccoli la scheda scorre: porta la spiegazione in vista solo se serve
+  requestAnimationFrame(()=>{ try{ wrap.scrollIntoView({block:'nearest', behavior:'smooth'}); }catch(e){} });
 }
 
 /* ---------------- SCREEN: RESULTS ---------------- */

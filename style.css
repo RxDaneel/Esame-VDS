@@ -698,19 +698,16 @@ body.device-web .result-top{ align-items:center; }
   .result-top{ padding:18px; }
 }
 
-/* ---- Spiegazione online ---- */
+/* ---- Spiegazioni ---- */
 .settings-group{ display:flex; flex-direction:column; gap:8px; margin:14px 0; }
 .settings-group .toggle-row[hidden]{ display:none; }
-.explain{ margin-top:12px; }
+.explain{ margin-top:12px; display:flex; flex-direction:column; gap:10px; }
 .explain[hidden]{ display:none; }
-.explain-btn{ width:100%; }
-.explain-body{ display:flex; flex-direction:column; gap:10px; }
-.explain-answer{ font-size:13px; color: var(--text-hi); background: var(--panel-2); border:1px solid var(--hairline); border-radius:10px; padding:10px 12px; }
-.explain-item{ background: var(--panel-2); border:1px solid var(--hairline); border-radius:10px; padding:10px 12px; }
-.explain-item p{ margin:6px 0 0; font-size:12.5px; line-height:1.45; color: var(--text-mid); }
-.explain-item a, .explain-links a{ color: var(--amber); font-size:12.5px; text-decoration:none; }
+.explain-links a{ color: var(--amber); font-size:12.5px; text-decoration:none; }
 .explain-links{ display:flex; gap:16px; flex-wrap:wrap; }
 .explain-none{ margin:0; font-size:12.5px; color: var(--text-dim); }
 body.device-mobile .explain{ margin-top:8px; }
 body.device-mobile .question-card{ overflow-y:auto; }
-.explain-btn[hidden]{ display:none; }
+.explain-head{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color: var(--amber); font-weight:600; }
+.explain-text{ margin:0; font-size:14px; line-height:1.5; color: var(--text-hi); }
+.explain-note{ margin:0; font-size:11px; line-height:1.4; color: var(--text-dim); }
