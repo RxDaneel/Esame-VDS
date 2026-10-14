@@ -1,23 +1,25 @@
 /* ============================================================
-   ESAME VDS — palette Claude (grigio scuro caldo + arancione), flat
+   ESAME VDS — tema Nero OLED (stesso delle altre app), flat
    ============================================================ */
 
 :root{
-  --bg:            #141413;
-  --panel:         #1E1D1B;
-  --panel-2:       #262523;
-  --panel-3:       #302E2B;
-  --hairline:      #3A3835;
-  --hairline-lite: #4A4742;
-  --text-hi:       #FAF9F5;
-  --text-mid:      #B0AEA5;
-  --text-dim:      #83807A;
-  --amber:         #D97757;
-  --amber-dim:     #6B4531;
-  --green:         #3FC98A;
-  --green-dim:     #17402F;
-  --red:           #EB5A5F;
-  --red-dim:       #4A2023;
+  --bg:            #000000;
+  --panel:         #0E0E0E;
+  --panel-2:       #1A1A1A;
+  --panel-3:       #242424;
+  --hairline:      #232323;
+  --hairline-lite: #333333;
+  --text-hi:       #F2F2F2;
+  --text-mid:      #BDBDBD;
+  --text-dim:      #8C8C8C;
+  --amber:         #E6E6E6;   /* accento: grigio chiaro, come nelle altre app */
+  --amber-dim:     #3A3A3A;
+  --on-accent:     #000000;
+  --green:         #5CB860;
+  --green-dim:     #12301A;
+  --red:           #E06060;
+  --red-dim:       #3A1818;
+  color-scheme: dark;
   --radius-lg: 18px;
   --radius-md: 12px;
   --radius-sm: 8px;
@@ -157,14 +159,14 @@ p.screen-sub{
 .btn:active{ transform: scale(0.98); }
 .btn-primary{
   background: var(--amber);
-  color: #221403;
+  color: var(--on-accent);
   border-color: transparent;
 }
 .btn-primary:hover{ filter:brightness(1.08); }
 .btn-ghost{ background:transparent; border-color: var(--hairline); color:var(--text-mid); }
 .btn-block{ width:100%; }
 .btn:disabled{ opacity:.4; cursor:not-allowed; }
-.btn-danger-outline{ color: var(--red); border-color: var(--red-dim); background: rgba(235,90,95,0.06); }
+.btn-danger-outline{ color: var(--red); border-color: var(--red-dim); background: rgba(224,96,96,0.06); }
 
 /* ---------------- SPECIALTY SCREEN ---------------- */
 .spec-grid{
@@ -196,7 +198,7 @@ p.screen-sub{
 .spec-img::after{
   content:"";
   position:absolute; inset:0;
-  background: rgba(20,20,19,0.55);
+  background: rgba(0,0,0,0.55);
 }
 .spec-label{
   position:absolute; left:12px; right:12px; bottom:10px;
@@ -212,8 +214,8 @@ p.screen-sub{
   font-family: var(--font-mono);
   font-size:9.5px;
   color: var(--amber);
-  background: rgba(20,20,19,0.65);
-  border:1px solid rgba(217,119,87,0.45);
+  background: rgba(0,0,0,0.7);
+  border:1px solid rgba(230,230,230,0.35);
   padding: 3px 6px;
   border-radius: 6px;
   letter-spacing:.08em;
@@ -298,7 +300,7 @@ p.screen-sub{
   background: var(--text-mid);
   transition: transform .18s ease, background .18s ease;
 }
-.toggle-switch.on{ background: rgba(217,119,87,0.18); border-color: var(--amber-dim); }
+.toggle-switch.on{ background: rgba(230,230,230,0.16); border-color: var(--amber-dim); }
 .toggle-switch.on .toggle-knob{ transform: translateX(18px); background: var(--amber); }
 
 /* ---------------- QUIZ SCREEN ---------------- */
@@ -383,13 +385,13 @@ p.screen-sub{
   display:flex; align-items:center; justify-content:center;
   font-size:12px; color: var(--text-mid); flex-shrink:0;
 }
-.option.selected{ border-color: var(--amber); background: rgba(217,119,87,0.08); }
-.option.selected .letter{ background: var(--amber); border-color: var(--amber); color:#221403; }
+.option.selected{ border-color: var(--amber); background: rgba(230,230,230,0.07); }
+.option.selected .letter{ background: var(--amber); border-color: var(--amber); color: var(--on-accent); }
 
-.option.correct{ border-color: var(--green); background: rgba(63,201,138,0.09); }
-.option.correct .letter{ background: var(--green); border-color: var(--green); color:#06231a; }
-.option.wrong{ border-color: var(--red); background: rgba(235,90,95,0.09); }
-.option.wrong .letter{ background: var(--red); border-color: var(--red); color:#2a0d0e; }
+.option.correct{ border-color: var(--green); background: rgba(92,184,96,0.10); }
+.option.correct .letter{ background: var(--green); border-color: var(--green); color:#000; }
+.option.wrong{ border-color: var(--red); background: rgba(224,96,96,0.10); }
+.option.wrong .letter{ background: var(--red); border-color: var(--red); color:#000; }
 .option.disabled{ cursor:default; }
 
 .quiz-nav{
@@ -486,9 +488,9 @@ p.screen-sub{
   display:flex; gap:8px;
 }
 .review-opt .letter{ font-family: var(--font-mono); color: var(--text-dim); }
-.review-opt.correct{ border-color: var(--green-dim); background: rgba(63,201,138,0.07); color: var(--text-hi); }
+.review-opt.correct{ border-color: var(--green-dim); background: rgba(92,184,96,0.08); color: var(--text-hi); }
 .review-opt.correct .letter{ color: var(--green); }
-.review-opt.wrong{ border-color: var(--red-dim); background: rgba(235,90,95,0.07); color: var(--text-hi); }
+.review-opt.wrong{ border-color: var(--red-dim); background: rgba(224,96,96,0.08); color: var(--text-hi); }
 .review-opt.wrong .letter{ color: var(--red); }
 
 .section-label{
@@ -498,7 +500,7 @@ p.screen-sub{
 
 /* ---------------- MODAL ---------------- */
 .modal-overlay{
-  position:fixed; inset:0; background: rgba(20,20,19,0.72);
+  position:fixed; inset:0; background: rgba(0,0,0,0.78);
   display:flex; align-items:center; justify-content:center;
   z-index:50; padding:20px; backdrop-filter: blur(3px);
 }
